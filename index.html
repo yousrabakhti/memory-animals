@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Memory Animals</title>
+
+  <style>
+    :root{
+      --bg1:#fff2f7;
+      --bg2:#f2fbff;
+      --bg3:#f7fff1;
+
+      --panel:#ffffffcc;
+      --shadow:0 10px 30px rgba(0,0,0,.12);
+
+      --text:#1b1b1b;
+      --muted:#5b5b5b;
+
+      --accent:#ff4d8d;
+      --accent2:#4dd2ff;
+      --accent3:#7b61ff;
+
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-rounded, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      background:
+        radial-gradient(900px 500px at 10% 10%, var(--bg1), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, var(--bg2), transparent 60%),
+        radial-gradient(900px 500px at 60% 90%, var(--bg3), transparent 60%),
+        linear-gradient(180deg, #ffffff, #f6fbff);
+      overflow-x:hidden;
+    }
+
+    header{
+      position:sticky; top:0; z-index:30;
+      padding:14px 12px 10px;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,.75);
+      border-bottom: 1px solid rgba(255,255,255,.9);
+    }
+
+    .top{
+      max-width:1100px; margin:0 auto;
+      display:flex; gap:10px; flex-wrap:wrap;
+      align-items:center; justify-content:space-between;
+    }
+
+    .brand{display:flex; gap:10px; align-items:center;}
+    .logo{
+      width:44px; height:44px;
+      border-radius:16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: var(--shadow);
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px;
+    }
+    h1{ margin:0; font-size:20px; }
+    .sub{ margin:0; color:var(--muted); font-size:12px; }
+
+    .tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+    .tab{
+      border:1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.9);
+      padding:10px 12px;
+      border-radius:16px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .tab.active{ border-color: rgba(0,0,0,.18); }
+
+    main{ max-width:1100px; margin:14px auto; padding:0 12px 50px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center; }
+
+    .chip{
+      background: rgba(255,255,255,.92);
+      border:1px solid rgba(0,0,0,.06);
+      padding:10px 12px;
+      border-radius:16px;
+      font-size:14px;
+      min-width:140px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+      text-align:center;
+    }
+
+    .panel{
+      margin-top:12px;
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,.95);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .panel h2{ margin:0 0 8px; font-size:16px; }
+    .muted{ color:var(--muted); }
+    .tiny{ font-size:12px; color:var(--muted); }
+
+    .btn{
+      padding:10px 14px;
+      border-radius:16px;
+      border:1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.95);
+      cursor:pointer;
+      font-weight:1000;
+    }
+    .btn.primary{
+      border-color: transparent;
+      color:#fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; }
+
+    .worlds,.levels{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+      margin-top:10px;
+    }
+    .pill{
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.94);
+      cursor:pointer;
+      font-weight:1000;
+    }
+    .pill.active{ outline: 3px solid rgba(255,77,141,.22); }
+    .pill.locked{ opacity:.45; cursor:not-allowed; }
+
+    .progressWrap{
+      margin-top:10px;
+      background: rgba(255,255,255,.8);
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:999px;
+      height:12px;
+      overflow:hidden;
+    }
+    .progressBar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+      border-radius:999px;
+      transition: width .3s ease;
+    }
+
+    .grid{
+      display:grid;
+      gap:10px;
+      justify-content:center;
+      margin:14px auto 0;
+    }
+
+    /* ✅ FINAL FIX: NO 3D FLIP => images won't disappear */
+    .card{
+      border-radius:22px;
+      border:2px solid rgba(255,255,255,.9);
+      box-shadow: 0 10px 18px rgba(0,0,0,.12);
+      cursor:pointer;
+      overflow:hidden;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      position:relative;
+      background: linear-gradient(135deg, #ff9bd1, #8fe7ff, #b8ffb0);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .card:active{ transform: scale(.98); }
+
+    .cardFace{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    .front{ background: rgba(255,255,255,.45); }
+    .front span{
+      font-size: 28px;
+      font-weight: 1000;
+      color: rgba(0,0,0,.25);
+      text-shadow: 0 2px 10px rgba(255,255,255,.7);
+    }
+
+    .back{
+      background:#fff;
+      display:none; /* hidden until flipped */
+    }
+    .back img{
+      width:100%; height:100%;
+      object-fit:contain;
+      padding:12px;
+    }
+
+    .card.flipped .front{ display:none; }
+    .card.flipped .back{ display:flex; }
+
+    .card.matched{
+      cursor:default;
+      outline: 4px solid rgba(123,97,255,.25);
+    }
+
+    .toast{
+      position:fixed;
+      left:50%; bottom:18px;
+      transform: translateX(-50%);
+      background: rgba(17,17,17,.92);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:16px;
+      font-weight:900;
+      display:none;
+      max-width:min(760px, 92vw);
+      box-shadow: 0 14px 40px rgba(0,0,0,.30);
+      z-index:80;
+    }
+
+    .modal{
+      position:fixed; inset:0;
+      display:none;
+      align-items:center; justify-content:center;
+      padding:16px;
+      background: rgba(0,0,0,.45);
+      z-index:90;
+    }
+    .box{
+      width:min(560px, 100%);
+      background: rgba(255,255,255,.96);
+      border:1px solid rgba(255,255,255,.95);
+      border-radius: 26px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      padding:16px;
+      text-align:left;
+    }
+    .stars{ font-size:24px; letter-spacing:3px; }
+    .box h3{ margin:0 0 6px; }
+    .box p{ margin:6px 0; color:var(--muted); }
+
+    .galleryGrid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    .gcard{
+      background: rgba(255,255,255,.92);
+      border:1px solid rgba(0,0,0,.06);
+      border-radius:22px;
+      padding:10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.10);
+      text-align:center;
+    }
+    .gimg{
+      width:100%;
+      aspect-ratio:1/1;
+      border-radius:18px;
+      border:1px solid rgba(0,0,0,.06);
+      background: rgba(255,255,255,.85);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .gimg img{ width:100%; height:100%; object-fit:contain; padding:12px; }
+    .lockedOverlay{ filter: grayscale(1); opacity:.30; }
+    .gname{ font-weight:1000; margin:8px 0 2px; }
+    .gfact{ font-size:13px; color:var(--muted); margin:0; }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="top">
+    <div class="brand">
+      <div class="logo">🦊</div>
+      <div>
+        <h1>Memory Animals</h1>
+        <p class="sub">Super easy → super hard • Stars • Gallery • Fun facts</p>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" id="tabPlay">Play</button>
+      <button class="tab" id="tabGallery">Gallery</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="viewPlay">
+    <div class="row">
+      <div class="chip">World: <b id="worldName">Baby Steps</b></div>
+      <div class="chip">Level: <b id="levelName">1</b></div>
+      <div class="chip">Time: <b id="time">0</b>s</div>
+      <div class="chip">Moves: <b id="moves">0</b></div>
+      <div class="chip">Best: <b id="bestStars">—</b></div>
+    </div>
+
+    <div class="panel">
+      <h2>Progress</h2>
+      <p class="muted">Your progress is saved automatically.</p>
+      <div class="progressWrap"><div class="progressBar" id="progressBar"></div></div>
+      <p class="tiny" id="progressText" style="margin:8px 0 0">0% completed</p>
+
+      <h2 style="margin-top:14px">Worlds</h2>
+      <div class="worlds" id="worlds"></div>
+
+      <h2 style="margin-top:14px">Levels</h2>
+      <p class="muted">Press <b>Start</b> then match identical cards. Try to get ★★★.</p>
+      <div class="levels" id="levels"></div>
+
+      <div class="row" style="margin-top:12px">
+        <button class="btn primary" id="startBtn">Start</button>
+        <button class="btn" id="restartBtn">Restart</button>
+        <button class="btn" id="resetBtn" title="Resets progress & gallery">Reset</button>
+      </div>
+    </div>
+
+    <div id="grid" class="grid"></div>
+  </section>
+
+  <section id="viewGallery" style="display:none">
+    <div class="panel">
+      <h2>Animal Gallery</h2>
+      <p class="muted">Animals unlock when you match them in the game.</p>
+      <div class="galleryGrid" id="galleryGrid"></div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<div id="modal" class="modal">
+  <div class="box">
+    <h3>🎉 Level Complete!</h3>
+    <div class="stars" id="starsLine">★★★</div>
+    <p id="winInfo">Great job.</p>
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="nextBtn">Next</button>
+      <button class="btn" id="againBtn">Play again</button>
+      <button class="btn" id="closeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ✅ always resolves assets correctly (local + GitHub Pages)
+  const BASE = new URL('.', window.location.href);
+  function asset(path){ return new URL(path, BASE).href; }
+
+  const ANIMALS = [
+    { id:"a1",  name:"Monkey",  src:asset("assets/a1.png"),  fact:"Monkeys use their tails for balance." },
+    { id:"a2",  name:"Fish",    src:asset("assets/a2.png"),  fact:"Many fish can sleep with eyes open." },
+    { id:"a3",  name:"Cat",     src:asset("assets/a3.png"),  fact:"Cats can jump about 6× their length." },
+    { id:"a4",  name:"Deer",    src:asset("assets/a4.png"),  fact:"Deer communicate with scents and sounds." },
+    { id:"a5",  name:"Panda",   src:asset("assets/a5.png"),  fact:"Pandas love bamboo all day long!" },
+    { id:"a6",  name:"Duck",    src:asset("assets/a6.png"),  fact:"Duck feathers help them stay dry." },
+    { id:"a7",  name:"Rabbit",  src:asset("assets/a7.png"),  fact:"Rabbits can hop fast and turn quickly." },
+    { id:"a8",  name:"Penguin", src:asset("assets/a8.png"),  fact:"Penguins are amazing swimmers." },
+    { id:"a9",  name:"Frog",    src:asset("assets/a9.png"),  fact:"Frogs absorb water through skin." },
+    { id:"a10", name:"Tiger",   src:asset("assets/a10.png"), fact:"Every tiger has unique stripes." },
+    { id:"a11", name:"Bee",     src:asset("assets/a11.png"), fact:"Bees pollinate flowers to help plants." },
+    { id:"a12", name:"Whale",   src:asset("assets/a12.png"), fact:"Some whales travel very far each year." },
+  ];
+  const byId = Object.fromEntries(ANIMALS.map(a => [a.id, a]));
+
+  const WORLDS = [
+    { key:"baby", name:"Baby Steps", levels: [
+      { level:1, pairs:2, cols:2 }, { level:2, pairs:3, cols:3 }, { level:3, pairs:4, cols:4 },
+      { level:4, pairs:4, cols:4 }, { level:5, pairs:5, cols:5 }, { level:6, pairs:6, cols:4 },
+    ]},
+    { key:"forest", name:"Forest Fun", levels: [
+      { level:1, pairs:6, cols:4 }, { level:2, pairs:7, cols:4 }, { level:3, pairs:8, cols:4 },
+      { level:4, pairs:8, cols:4 }, { level:5, pairs:9, cols:5 }, { level:6, pairs:10, cols:5 },
+    ]},
+    { key:"safari", name:"Safari Sprint", levels: [
+      { level:1, pairs:8, cols:4 }, { level:2, pairs:9, cols:5 }, { level:3, pairs:10, cols:5 },
+      { level:4, pairs:10, cols:5 }, { level:5, pairs:11, cols:6 }, { level:6, pairs:12, cols:6 },
+    ]},
+    { key:"challenge", name:"Super Challenge", levels: [
+      { level:1, pairs:10, cols:5 }, { level:2, pairs:11, cols:6 }, { level:3, pairs:12, cols:6 },
+      { level:4, pairs:12, cols:6 }, { level:5, pairs:12, cols:6 }, { level:6, pairs:12, cols:6 },
+    ]},
+  ];
+
+  const LS_KEY = "memory_animals_no3d_v1";
+  function loadState(){
+    try{
+      const st = JSON.parse(localStorage.getItem(LS_KEY));
+      return {
+        unlockedWorld: Number.isFinite(st?.unlockedWorld) ? st.unlockedWorld : 0,
+        unlockedLevel: Number.isFinite(st?.unlockedLevel) ? st.unlockedLevel : 0,
+        stars: (st?.stars && typeof st.stars === "object") ? st.stars : {},
+        unlockedAnimals: Array.isArray(st?.unlockedAnimals) ? st.unlockedAnimals : []
+      };
+    }catch{
+      return { unlockedWorld:0, unlockedLevel:0, stars:{}, unlockedAnimals:[] };
+    }
+  }
+  function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  let state = loadState();
+
+  const tabPlay = document.getElementById("tabPlay");
+  const tabGallery = document.getElementById("tabGallery");
+  const viewPlay = document.getElementById("viewPlay");
+  const viewGallery = document.getElementById("viewGallery");
+
+  const worldsEl = document.getElementById("worlds");
+  const levelsEl = document.getElementById("levels");
+  const gridEl = document.getElementById("grid");
+
+  const worldNameEl = document.getElementById("worldName");
+  const levelNameEl = document.getElementById("levelName");
+  const timeEl = document.getElementById("time");
+  const movesEl = document.getElementById("moves");
+  const bestStarsEl = document.getElementById("bestStars");
+
+  const progressBar = document.getElementById("progressBar");
+  const progressText = document.getElementById("progressText");
+
+  const startBtn = document.getElementById("startBtn");
+  const restartBtn = document.getElementById("restartBtn");
+  const resetBtn = document.getElementById("resetBtn");
+
+  const toastEl = document.getElementById("toast");
+  const modal = document.getElementById("modal");
+  const starsLine = document.getElementById("starsLine");
+  const winInfo = document.getElementById("winInfo");
+  const nextBtn = document.getElementById("nextBtn");
+  const againBtn = document.getElementById("againBtn");
+  const closeBtn = document.getElementById("closeBtn");
+
+  const galleryGrid = document.getElementById("galleryGrid");
+
+  let currentWorldIndex = 0;
+  let currentLevelIndex = 0;
+
+  let started = false;
+  let timer = null;
+  let seconds = 0;
+  let moves = 0;
+  let matchedPairs = 0;
+  let firstCard = null;
+  let lock = false;
+
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+  function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+  function resetCounters(){
+    stopTimer();
+    seconds=0; moves=0; matchedPairs=0;
+    firstCard=null; lock=false; started=false;
+    timeEl.textContent = seconds;
+    movesEl.textContent = moves;
+    startBtn.disabled = false;
+  }
+  function startTimer(){
+    if(timer) return;
+    timer=setInterval(()=>{ seconds++; timeEl.textContent=seconds; }, 1000);
+  }
+  function showToast(t){
+    toastEl.textContent=t;
+    toastEl.style.display="block";
+    setTimeout(()=> toastEl.style.display="none", 1700);
+  }
+  function starsText(n){ return n<=0 ? "—" : ("★".repeat(n) + "☆".repeat(3-n)); }
+
+  function totalLevelsCount(){ return WORLDS.reduce((s,w)=>s+w.levels.length,0); }
+  function completedLevelsCount(){
+    let c=0;
+    for(const w of WORLDS){
+      for(const lvl of w.levels){
+        const k = `${w.key}_${lvl.level}`;
+        if((state.stars[k]||0)>0) c++;
+      }
+    }
+    return c;
+  }
+  function updateProgressBar(){
+    const total = totalLevelsCount();
+    const done = completedLevelsCount();
+    const pct = Math.round((done/total)*100);
+    progressBar.style.width = `${pct}%`;
+    progressText.textContent = `${pct}% completed (${done}/${total} levels)`;
+  }
+
+  function levelKey(wi, li){
+    const w = WORLDS[wi];
+    const lvl = w.levels[li];
+    return `${w.key}_${lvl.level}`;
+  }
+  function getBestStars(wi, li){ return state.stars[levelKey(wi,li)] || 0; }
+  function setBestStars(wi, li, s){
+    const k = levelKey(wi,li);
+    const prev = state.stars[k] || 0;
+    if(s>prev){ state.stars[k]=s; saveState(); }
+  }
+  function unlockAnimal(animalId){
+    if(!state.unlockedAnimals.includes(animalId)){
+      state.unlockedAnimals.push(animalId);
+      saveState();
+    }
+  }
+  function calcStars(pairs, timeSec, moveCount){
+    const t3 = Math.max(10, Math.round(pairs * 10));
+    const t2 = Math.max(12, Math.round(pairs * 13));
+    const m3 = Math.max(2, pairs + Math.round(pairs*0.4));
+    const m2 = Math.max(3, pairs + Math.round(pairs*0.8));
+    if(timeSec <= t3 && moveCount <= m3) return 3;
+    if(timeSec <= t2 && moveCount <= m2) return 2;
+    return 1;
+  }
+
+  function buildWorlds(){
+    worldsEl.innerHTML="";
+    WORLDS.forEach((w, idx)=>{
+      const locked = idx > state.unlockedWorld;
+      const b = document.createElement("button");
+      b.className="pill";
+      b.textContent = locked ? `${w.name} 🔒` : w.name;
+      if(locked) b.classList.add("locked");
+      if(idx===currentWorldIndex) b.classList.add("active");
+      b.addEventListener("click", ()=>{
+        if(locked) return;
+        currentWorldIndex=idx;
+        currentLevelIndex=0;
+        render();
+      });
+      worldsEl.appendChild(b);
+    });
+  }
+
+  function buildLevels(){
+    levelsEl.innerHTML="";
+    const w = WORLDS[currentWorldIndex];
+    w.levels.forEach((lvl, idx)=>{
+      const isSameWorldUnlocked = currentWorldIndex <= state.unlockedWorld;
+      const maxOpenIndex = (currentWorldIndex < state.unlockedWorld) ? (w.levels.length-1) : Math.max(state.unlockedLevel,0);
+      const locked = !isSameWorldUnlocked || idx > maxOpenIndex;
+
+      const best = getBestStars(currentWorldIndex, idx);
+      const b = document.createElement("button");
+      b.className="pill";
+      b.textContent = locked ? `Level ${lvl.level} 🔒` : `Level ${lvl.level} • ${lvl.pairs} pairs • ${starsText(best)}`;
+      if(locked) b.classList.add("locked");
+      if(idx===currentLevelIndex) b.classList.add("active");
+      b.addEventListener("click", ()=>{
+        if(locked) return;
+        currentLevelIndex=idx;
+        render();
+      });
+      levelsEl.appendChild(b);
+    });
+  }
+
+  function setGrid(cols){
+    gridEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    const sizeByCols = {2:120, 3:110, 4:96, 5:84, 6:78};
+    const ideal = sizeByCols[cols] || 90;
+    const max=110, min=68;
+    const size = Math.max(min, Math.min(max, Math.floor(Math.min(ideal, (window.innerWidth - 70) / cols))));
+    const maxWidth = cols*size + (cols-1)*10;
+    gridEl.style.maxWidth = Math.min(maxWidth, 980) + "px";
+    return size;
+  }
+
+  function buildDeck(pairs){
+    const picks = ANIMALS.slice(0, pairs).map(a=>a.id);
+    return shuffle([...picks, ...picks]);
+  }
+
+  function renderBoard(){
+    const w = WORLDS[currentWorldIndex];
+    const lvl = w.levels[currentLevelIndex];
+
+    worldNameEl.textContent = w.name;
+    levelNameEl.textContent = lvl.level;
+    bestStarsEl.textContent = starsText(getBestStars(currentWorldIndex, currentLevelIndex));
+
+    resetCounters();
+    modal.style.display="none";
+    gridEl.innerHTML="";
+
+    const deck = buildDeck(lvl.pairs);
+    const size = setGrid(lvl.cols);
+
+    deck.forEach(animalId=>{
+      const card = document.createElement("button");
+      card.type="button";
+      card.className="card";
+      card.dataset.animalId = animalId;
+      card.style.width = size + "px";
+      card.style.height = size + "px";
+
+      const front = document.createElement("div");
+      front.className="cardFace front";
+      const star = document.createElement("span");
+      star.textContent = "★";
+      front.appendChild(star);
+
+      const back = document.createElement("div");
+      back.className="cardFace back";
+
+      const img = document.createElement("img");
+      img.alt = byId[animalId].name;
+      img.src = byId[animalId].src;
+
+      img.onerror = () => showToast("❗ Image not found. Check assets/a1.png ... a12.png");
+      back.appendChild(img);
+
+      card.appendChild(front);
+      card.appendChild(back);
+
+      card.addEventListener("click", ()=> flip(card, lvl.pairs));
+      gridEl.appendChild(card);
+    });
+  }
+
+  function flip(card, pairs){
+    if(lock) return;
+    if(card.classList.contains("matched")) return;
+    if(card === firstCard) return;
+    if(!started) return;
+
+    startTimer();
+    card.classList.add("flipped");
+
+    if(!firstCard){
+      firstCard = card;
+      return;
+    }
+
+    moves++;
+    movesEl.textContent = moves;
+
+    const a = firstCard.dataset.animalId;
+    const b = card.dataset.animalId;
+
+    if(a === b){
+      firstCard.classList.add("matched");
+      card.classList.add("matched");
+      matchedPairs++;
+      unlockAnimal(a);
+      showToast(`✅ ${byId[a].name}: ${byId[a].fact}`);
+      firstCard = null;
+
+      if(matchedPairs === pairs){
+        stopTimer();
+        const stars = calcStars(pairs, seconds, moves);
+        setBestStars(currentWorldIndex, currentLevelIndex, stars);
+
+        const w = WORLDS[currentWorldIndex];
+        const lastLevel = currentLevelIndex === w.levels.length - 1;
+
+        if(currentWorldIndex === state.unlockedWorld){
+          state.unlockedLevel = Math.max(state.unlockedLevel, currentLevelIndex + 1);
+          if(lastLevel && state.unlockedWorld < WORLDS.length - 1){
+            state.unlockedWorld++;
+            state.unlockedLevel = 0;
+          }
+          saveState();
+        }
+
+        updateProgressBar();
+        buildWorlds();
+        buildLevels();
+
+        starsLine.textContent = "★".repeat(stars) + "☆".repeat(3-stars);
+        winInfo.textContent = `Time: ${seconds}s • Moves: ${moves} • Best: ${starsText(getBestStars(currentWorldIndex, currentLevelIndex))}`;
+        nextBtn.disabled = !hasNext();
+        modal.style.display="flex";
+
+        renderGallery();
+      }
+    } else {
+      lock = true;
+      setTimeout(()=>{
+        card.classList.remove("flipped");
+        firstCard.classList.remove("flipped");
+        firstCard = null;
+        lock = false;
+      }, 650);
+    }
+  }
+
+  function hasNext(){
+    const w = WORLDS[currentWorldIndex];
+    if(currentLevelIndex < w.levels.length - 1){
+      if(currentWorldIndex < state.unlockedWorld) return true;
+      return (currentLevelIndex + 1) <= state.unlockedLevel;
+    }
+    return (currentWorldIndex + 1) <= state.unlockedWorld;
+  }
+  function goNext(){
+    const w = WORLDS[currentWorldIndex];
+    if(currentLevelIndex < w.levels.length - 1){
+      currentLevelIndex++;
+      render();
+      return;
+    }
+    if(currentWorldIndex + 1 <= state.unlockedWorld){
+      currentWorldIndex++;
+      currentLevelIndex = 0;
+      render();
+    }
+  }
+
+  function renderGallery(){
+    galleryGrid.innerHTML="";
+    ANIMALS.forEach(a=>{
+      const unlocked = state.unlockedAnimals.includes(a.id);
+      const c = document.createElement("div");
+      c.className="gcard";
+
+      const wrap = document.createElement("div");
+      wrap.className="gimg";
+
+      const img = document.createElement("img");
+      img.src = a.src;
+      img.alt = a.name;
+      if(!unlocked) img.classList.add("lockedOverlay");
+
+      wrap.appendChild(img);
+
+      const name = document.createElement("div");
+      name.className="gname";
+      name.textContent = unlocked ? a.name : "???";
+
+      const fact = document.createElement("p");
+      fact.className="gfact";
+      fact.textContent = unlocked ? a.fact : "Unlock by matching in game.";
+
+      c.appendChild(wrap);
+      c.appendChild(name);
+      c.appendChild(fact);
+      galleryGrid.appendChild(c);
+    });
+  }
+
+  function setTab(which){
+    const play = which === "play";
+    tabPlay.classList.toggle("active", play);
+    tabGallery.classList.toggle("active", !play);
+    viewPlay.style.display = play ? "" : "none";
+    viewGallery.style.display = play ? "none" : "";
+    if(!play) renderGallery();
+  }
+
+  function render(){
+    buildWorlds();
+    buildLevels();
+    updateProgressBar();
+    renderBoard();
+  }
+
+  startBtn.addEventListener("click", ()=>{
+    [...gridEl.querySelectorAll(".card")].forEach(c=>{
+      c.classList.remove("flipped","matched");
+    });
+    resetCounters();
+    started = true;
+    startBtn.disabled = true;
+  });
+
+  restartBtn.addEventListener("click", render);
+
+  resetBtn.addEventListener("click", ()=>{
+    const ok = confirm("Reset all progress and gallery unlocks?");
+    if(!ok) return;
+    state = { unlockedWorld:0, unlockedLevel:0, stars:{}, unlockedAnimals:[] };
+    saveState();
+    currentWorldIndex=0;
+    currentLevelIndex=0;
+    render();
+    renderGallery();
+  });
+
+  nextBtn.addEventListener("click", ()=>{ modal.style.display="none"; goNext(); });
+  againBtn.addEventListener("click", ()=>{ modal.style.display="none"; render(); });
+  closeBtn.addEventListener("click", ()=>{ modal.style.display="none"; });
+
+  tabPlay.addEventListener("click", ()=> setTab("play"));
+  tabGallery.addEventListener("click", ()=> setTab("gallery"));
+
+  // ✅ IMPORTANT: no board rebuild on resize (avoids glitches)
+  currentWorldIndex = Math.min(currentWorldIndex, state.unlockedWorld);
+  currentLevelIndex = 0;
+
+  render();
+  renderGallery();
+</script>
+</body>
+</html>
+
+
+
+
