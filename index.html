@@ -154,7 +154,6 @@
       margin:14px auto 0;
     }
 
-    /* ✅ FINAL FIX: NO 3D FLIP => images won't disappear */
     .card{
       border-radius:22px;
       border:2px solid rgba(255,255,255,.9);
@@ -343,7 +342,6 @@
 </div>
 
 <script>
-  // ✅ always resolves assets correctly (local + GitHub Pages)
   const BASE = new URL('.', window.location.href);
   function asset(path){ return new URL(path, BASE).href; }
 
@@ -786,7 +784,6 @@
   tabPlay.addEventListener("click", ()=> setTab("play"));
   tabGallery.addEventListener("click", ()=> setTab("gallery"));
 
-  // ✅ IMPORTANT: no board rebuild on resize (avoids glitches)
   currentWorldIndex = Math.min(currentWorldIndex, state.unlockedWorld);
   currentLevelIndex = 0;
 
@@ -795,6 +792,7 @@
 </script>
 </body>
 </html>
+
 
 
 
